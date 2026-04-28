@@ -17,7 +17,9 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('/webhooks/gocardless', GoCardlessWebhookController::class)->name('webhooks.gocardless');
-Route::get('/customer/direct-debit/callback', [Customer\DirectDebitController::class, 'callback'])->name('customer.direct-debit.callback');
+Route::get('/customer/direct-debit/callback/{company}', [Customer\DirectDebitController::class, 'callback'])
+    ->middleware('signed')
+    ->name('customer.direct-debit.callback');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Admin\DashboardController::class)->name('dashboard');

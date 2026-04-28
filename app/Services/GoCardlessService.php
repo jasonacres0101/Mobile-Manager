@@ -60,7 +60,7 @@ class GoCardlessService
         return $customer->id;
     }
 
-    public function createBillingRequestFlow(Company $company, string $redirectUri, ?string $email = null): array
+    public function createBillingRequestFlow(Company $company, string|callable $redirectUri, ?string $email = null): array
     {
         $billingRequestParams = [
             'mandate_request' => [
@@ -86,6 +86,10 @@ class GoCardlessService
             $company->update(['gocardless_customer_id' => $billingRequest->links->customer]);
         }
 
+        $resolvedRedirectUri = is_callable($redirectUri)
+            ? $redirectUri($billingRequest->id)
+            : $redirectUri;
+
         $prefilledCustomer = array_filter([
             'company_name' => $company->name,
             'email' => $email,
@@ -93,7 +97,7 @@ class GoCardlessService
 
         $flow = $this->client()->billingRequestFlows()->create([
             'params' => [
-                'redirect_uri' => $redirectUri,
+                'redirect_uri' => $resolvedRedirectUri,
                 'exit_uri' => route('customer.direct-debit.setup'),
                 'prefilled_customer' => $prefilledCustomer,
                 'links' => [

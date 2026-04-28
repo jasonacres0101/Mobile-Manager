@@ -10,7 +10,7 @@ use App\Models\Sim;
 use App\Models\User;
 use App\Services\GoCardlessService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
 use Mockery;
 use Tests\TestCase;
 
@@ -125,8 +125,10 @@ class CustomerPortalTest extends TestCase
         $this->app->instance(GoCardlessService::class, $mock);
 
         $this->actingAs($user)
-            ->withSession(['gocardless_billing_request_id' => 'BRQ123'])
-            ->get(route('customer.direct-debit.callback'))
+            ->get(URL::temporarySignedRoute('customer.direct-debit.callback', now()->addDay(), [
+                'company' => $company,
+                'billing_request_id' => 'BRQ123',
+            ]))
             ->assertRedirect(route('customer.direct-debit.setup'));
 
         $this->assertSame('CU999', $company->fresh()->gocardless_customer_id);
@@ -137,19 +139,12 @@ class CustomerPortalTest extends TestCase
         ]);
     }
 
-    public function test_direct_debit_callback_can_use_cached_billing_request_id(): void
+    public function test_guest_direct_debit_callback_can_use_signed_company_and_billing_request(): void
     {
         $company = Company::create([
             'name' => 'Test Customer Ltd',
             'connectwise_company_id' => 900001,
         ]);
-
-        $user = User::factory()->create([
-            'company_id' => $company->id,
-            'role' => 'customer',
-        ]);
-
-        Cache::put("company:{$company->id}:gocardless_billing_request_id", 'BRQ456', now()->addDay());
 
         $mock = Mockery::mock(GoCardlessService::class);
         $mock->shouldReceive('billingRequestSummary')
@@ -162,9 +157,11 @@ class CustomerPortalTest extends TestCase
 
         $this->app->instance(GoCardlessService::class, $mock);
 
-        $this->actingAs($user)
-            ->get(route('customer.direct-debit.callback'))
-            ->assertRedirect(route('customer.direct-debit.setup'));
+        $this->get(URL::temporarySignedRoute('customer.direct-debit.callback', now()->addDay(), [
+            'company' => $company,
+            'billing_request_id' => 'BRQ456',
+        ]))
+            ->assertRedirect(route('login'));
 
         $this->assertSame('CU456', $company->fresh()->gocardless_customer_id);
         $this->assertDatabaseHas('gocardless_mandates', [
@@ -172,41 +169,5 @@ class CustomerPortalTest extends TestCase
             'mandate_id' => 'MD456',
             'status' => 'created',
         ]);
-        $this->assertNull(Cache::get("company:{$company->id}:gocardless_billing_request_id"));
-    }
-
-    public function test_guest_direct_debit_callback_can_use_token_payload(): void
-    {
-        $company = Company::create([
-            'name' => 'Test Customer Ltd',
-            'connectwise_company_id' => 900001,
-        ]);
-
-        Cache::put('gocardless:callback-token:test-token', [
-            'company_id' => $company->id,
-            'billing_request_id' => 'BRQ789',
-        ], now()->addDay());
-
-        $mock = Mockery::mock(GoCardlessService::class);
-        $mock->shouldReceive('billingRequestSummary')
-            ->once()
-            ->with('BRQ789')
-            ->andReturn([
-                'mandate_id' => 'MD789',
-                'customer_id' => 'CU789',
-            ]);
-
-        $this->app->instance(GoCardlessService::class, $mock);
-
-        $this->get(route('customer.direct-debit.callback', ['token' => 'test-token']))
-            ->assertRedirect(route('login'));
-
-        $this->assertSame('CU789', $company->fresh()->gocardless_customer_id);
-        $this->assertDatabaseHas('gocardless_mandates', [
-            'company_id' => $company->id,
-            'mandate_id' => 'MD789',
-            'status' => 'created',
-        ]);
-        $this->assertNull(Cache::get('gocardless:callback-token:test-token'));
     }
 }

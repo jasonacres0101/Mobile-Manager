@@ -7,8 +7,7 @@ use App\Models\Company;
 use App\Models\GocardlessMandate;
 use App\Services\GoCardlessService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
 
 class DirectDebitController extends Controller
 {
@@ -18,19 +17,18 @@ class DirectDebitController extends Controller
         abort_unless($company, 403);
 
         if ($request->boolean('start')) {
-            $callbackToken = Str::uuid()->toString();
             $flow = $goCardless->createBillingRequestFlow(
                 $company,
-                route('customer.direct-debit.callback', ['token' => $callbackToken]),
+                fn (string $billingRequestId) => URL::temporarySignedRoute(
+                    'customer.direct-debit.callback',
+                    now()->addDay(),
+                    [
+                        'company' => $company,
+                        'billing_request_id' => $billingRequestId,
+                    ],
+                ),
                 $request->user()->email,
             );
-
-            $request->session()->put('gocardless_billing_request_id', $flow['billing_request_id']);
-            Cache::put($this->billingRequestCacheKey($company->id), $flow['billing_request_id'], now()->addDay());
-            Cache::put($this->callbackTokenCacheKey($callbackToken), [
-                'company_id' => $company->id,
-                'billing_request_id' => $flow['billing_request_id'],
-            ], now()->addDay());
 
             return redirect()->away($flow['redirect_url']);
         }
@@ -55,24 +53,10 @@ class DirectDebitController extends Controller
             ->with('status', "Refreshed {$mandates} mandate(s) and {$payments} payment(s).");
     }
 
-    public function callback(Request $request, GoCardlessService $goCardless)
+    public function callback(Request $request, Company $company, GoCardlessService $goCardless)
     {
         $user = $request->user();
-        $company = $user?->company;
-        $billingRequestId = $request->session()->pull('gocardless_billing_request_id');
-
-        if (! $billingRequestId && $company) {
-            $billingRequestId = Cache::pull($this->billingRequestCacheKey($company->id));
-        }
-
-        if ((! $company || ! $billingRequestId) && $request->filled('token')) {
-            $payload = Cache::pull($this->callbackTokenCacheKey((string) $request->string('token')));
-
-            if (is_array($payload)) {
-                $company ??= Company::find(data_get($payload, 'company_id'));
-                $billingRequestId ??= data_get($payload, 'billing_request_id');
-            }
-        }
+        $billingRequestId = (string) $request->string('billing_request_id');
 
         if ($company && $billingRequestId) {
             $summary = $goCardless->billingRequestSummary($billingRequestId);
@@ -104,15 +88,5 @@ class DirectDebitController extends Controller
         return redirect()
             ->route('login')
             ->with('status', $status);
-    }
-
-    private function billingRequestCacheKey(int $companyId): string
-    {
-        return "company:{$companyId}:gocardless_billing_request_id";
-    }
-
-    private function callbackTokenCacheKey(string $token): string
-    {
-        return "gocardless:callback-token:{$token}";
     }
 }
