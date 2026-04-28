@@ -122,8 +122,11 @@ class GoCardlessService
         $billingRequest = $this->client()->billingRequests()->get($billingRequestId);
 
         return [
-            'mandate_id' => $billingRequest->links->mandate ?? null,
-            'customer_id' => $billingRequest->links->customer ?? null,
+            'status' => $billingRequest->status ?? null,
+            'mandate_id' => data_get($billingRequest, 'mandate_request.links.mandate')
+                ?? data_get($billingRequest, 'links.mandate'),
+            'customer_id' => data_get($billingRequest, 'links.customer')
+                ?? data_get($billingRequest, 'customer.id'),
         ];
     }
 
