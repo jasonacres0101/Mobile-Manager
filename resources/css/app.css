@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --micronet-navy: #020f40;
+        --micronet-orange: #ffa500;
+        --micronet-cyan: #00a7e1;
+    }
+
+    body {
+        background:
+            linear-gradient(180deg, rgba(255, 165, 0, 0.07), rgba(255, 255, 255, 0) 220px),
+            #f8fafc;
+    }
+}
+
+@layer components {
+    .app-shell h1:not([class*="text-"]),
+    .app-shell h2:not([class*="text-"]),
+    .app-shell h3:not([class*="text-"]) {
+        color: var(--micronet-navy);
+    }
+
+    .dark .app-shell h1:not([class*="text-"]),
+    .dark .app-shell h2:not([class*="text-"]),
+    .dark .app-shell h3:not([class*="text-"]) {
+        color: #f8fafc;
+    }
+
+    .app-shell a {
+        text-underline-offset: 3px;
+    }
+
+    .app-shell main section,
+    .app-shell main form,
+    .app-shell main table {
+        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    }
+
+    .app-shell main section:hover,
+    .app-shell main form:hover {
+        border-color: rgba(255, 165, 0, 0.45);
+    }
+
+    .app-shell table thead {
+        border-bottom: 2px solid rgba(255, 165, 0, 0.75);
+    }
+
+    .app-shell table th {
+        letter-spacing: 0;
+    }
+
+    .app-shell input:focus,
+    .app-shell select:focus,
+    .app-shell textarea:focus {
+        border-color: var(--micronet-orange);
+        box-shadow: 0 0 0 1px var(--micronet-orange);
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        accent-color: var(--micronet-orange);
+    }
+}
