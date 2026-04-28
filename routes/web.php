@@ -17,6 +17,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('/webhooks/gocardless', GoCardlessWebhookController::class)->name('webhooks.gocardless');
+Route::get('/customer/direct-debit/callback', [Customer\DirectDebitController::class, 'callback'])->name('customer.direct-debit.callback');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Admin\DashboardController::class)->name('dashboard');
@@ -63,7 +64,6 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::get('/invoices', [Customer\InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/direct-debit/setup', [Customer\DirectDebitController::class, 'setup'])->name('direct-debit.setup');
     Route::post('/direct-debit/refresh', [Customer\DirectDebitController::class, 'refresh'])->name('direct-debit.refresh');
-    Route::get('/direct-debit/callback', [Customer\DirectDebitController::class, 'callback'])->name('direct-debit.callback');
 });
 
 Route::middleware('auth')->group(function () {
