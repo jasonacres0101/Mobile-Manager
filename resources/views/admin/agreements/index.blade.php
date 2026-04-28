@@ -33,8 +33,8 @@
                         </div>
                         <div>
                             <div class="text-xs font-semibold uppercase tracking-widest text-[#FFA500]">ConnectWise PSA</div>
-                            <h3 class="mt-2 text-2xl font-semibold text-white">SIM Agreements</h3>
-                            <p class="mt-1 text-sm text-slate-200">Only configured SIM agreement type IDs are synced from PSA into this portal.</p>
+                            <h3 class="mt-2 text-2xl font-semibold text-white">Service Agreements</h3>
+                            <p class="mt-1 text-sm text-slate-200">Configured ConnectWise service agreement types are synced, while SIM and fibre are classified from addition custom fields.</p>
                         </div>
                     </div>
                 </div>

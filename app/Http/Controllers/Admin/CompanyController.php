@@ -14,7 +14,7 @@ class CompanyController extends Controller
         $sort = $request->input('sort', 'name');
         $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = min((int) $request->input('per_page', 25), 100);
-        $sortable = ['name', 'connectwise_company_id', 'agreements_count', 'sims_count', 'invoices_count'];
+        $sortable = ['name', 'connectwise_company_id', 'agreements_count', 'sims_count', 'fibre_connections_count', 'invoices_count'];
 
         if (! in_array($sort, $sortable, true)) {
             $sort = 'name';
@@ -22,7 +22,7 @@ class CompanyController extends Controller
 
         return view('admin.companies.index', [
             'companies' => Company::query()
-                ->withCount(['agreements', 'sims', 'invoices'])
+                ->withCount(['agreements', 'sims', 'fibreConnections', 'invoices'])
                 ->when($request->filled('q'), function ($query) use ($request) {
                     $search = $request->input('q');
 
@@ -45,8 +45,11 @@ class CompanyController extends Controller
         $company->load([
             'agreements.invoices',
             'agreements.sims',
+            'agreements.fibreConnections',
             'sims.agreement',
+            'fibreConnections.agreement',
             'invoices.payments',
+            'invoices.items',
             'payments.invoice',
             'mandates',
             'users',

@@ -41,9 +41,19 @@ class Company extends Model
         return $this->hasMany(Sim::class);
     }
 
+    public function fibreConnections()
+    {
+        return $this->hasMany(FibreConnection::class);
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItem::class);
     }
 
     public function mandates()

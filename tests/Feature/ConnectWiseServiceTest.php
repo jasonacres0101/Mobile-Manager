@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Jobs\SyncConnectWiseAgreementJob;
 use App\Models\Agreement;
 use App\Models\Company;
+use App\Models\FibreConnection;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Sim;
 use App\Services\AppSettings;
 use App\Services\ConnectWiseService;
@@ -92,6 +94,9 @@ class ConnectWiseServiceTest extends TestCase
                     [
                         'id' => 800001,
                         'description' => 'Unlimited UK Data SIM',
+                        'customFields' => [
+                            ['caption' => 'Micronet - Service Type', 'value' => 'Sim'],
+                        ],
                         'product' => ['id' => 12345, 'name' => 'CW Product Name'],
                         'unitPrice' => 15,
                         'status' => ['name' => 'Active'],
@@ -139,6 +144,7 @@ class ConnectWiseServiceTest extends TestCase
                         'id' => 800001,
                         'description' => 'Unlimited UK Data SIM',
                         'customFields' => [
+                            ['caption' => 'Micronet - Service Type', 'value' => 'Sim'],
                             ['caption' => 'ICCID', 'value' => '8944000000000000001'],
                         ],
                         'unitPrice' => 15,
@@ -186,7 +192,17 @@ class ConnectWiseServiceTest extends TestCase
 
             public function getAgreementAdditions(int|string $agreementId): array
             {
-                return [];
+                return [
+                    [
+                        'id' => 800001,
+                        'description' => 'Unlimited UK Data SIM',
+                        'customFields' => [
+                            ['caption' => 'Micronet - Service Type', 'value' => 'Sim'],
+                        ],
+                        'unitPrice' => 15,
+                        'status' => ['name' => 'Active'],
+                    ],
+                ];
             }
 
             public function getInvoicesForAgreement(int|string $agreementId): array
@@ -222,26 +238,65 @@ class ConnectWiseServiceTest extends TestCase
             'company_id' => $company->id,
             'connectwise_agreement_id' => 700001,
             'connectwise_agreement_type_id' => 35,
+            'service_type' => 'service',
             'name' => 'SIM Agreement',
             'status' => 'Active',
         ]);
 
+        Sim::create([
+            'company_id' => $company->id,
+            'agreement_id' => Agreement::firstOrFail()->id,
+            'connectwise_addition_id' => 800001,
+            'mobile_number' => '447700900001',
+            'monthly_cost' => 15,
+            'status' => 'Active',
+        ]);
+
+        FibreConnection::create([
+            'company_id' => $company->id,
+            'agreement_id' => Agreement::firstOrFail()->id,
+            'connectwise_addition_id' => 800002,
+            'service_identifier' => 'FTTP 100',
+            'monthly_cost' => 55,
+            'status' => 'Active',
+        ]);
+
         Http::fake([
-            'connectwise.test/*' => Http::response([
+            'connectwise.test/apis/3.0/procurement/products*' => Http::response([
+                [
+                    'id' => 910001,
+                    'agreementAddition' => ['id' => 800001],
+                    'description' => 'Unlimited UK Data SIM',
+                    'quantity' => 1,
+                    'unitPrice' => 15,
+                    'total' => 15,
+                ],
+                [
+                    'id' => 910002,
+                    'agreementAddition' => ['id' => 800002],
+                    'description' => 'FTTP 100',
+                    'quantity' => 1,
+                    'unitPrice' => 55,
+                    'total' => 55,
+                ],
+            ], 200),
+            'connectwise.test/apis/3.0/finance/invoices*' => Http::response([
                 [
                     'id' => 600001,
                     'invoiceNumber' => 'INV-1001',
-                    'total' => 34.25,
-                    'balance' => 34.25,
+                    'total' => 89.25,
+                    'balance' => 89.25,
                     'status' => ['name' => 'New'],
                 ],
             ], 200),
         ]);
 
         $this->artisan('sync:connectwise-invoices --now')
-            ->expectsOutput('Synced 1 SIM agreement invoice sync jobs.')
+            ->expectsOutput('Synced 1 configured service agreement invoice sync jobs.')
             ->assertSuccessful();
 
         $this->assertSame('INV-1001', Invoice::firstOrFail()->invoice_number);
+        $this->assertCount(2, InvoiceItem::all());
+        $this->assertSame(['fibre', 'sim'], InvoiceItem::query()->orderBy('service_type')->pluck('service_type')->all());
     }
 }

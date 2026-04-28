@@ -16,11 +16,13 @@ class DashboardController extends Controller
         return view('customer.dashboard', [
             'company' => $company,
             'simCount' => $company->sims()->count(),
+            'fibreCount' => $company->fibreConnections()->count(),
             'invoiceCount' => $company->invoices()->count(),
             'openBalance' => $company->invoices()->sum('balance'),
             'mandate' => $company->mandates()->latest()->first(),
             'recentInvoices' => $company->invoices()->with('payments')->latest()->take(5)->get(),
             'recentSims' => $company->sims()->latest()->take(5)->get(),
+            'recentFibreConnections' => $company->fibreConnections()->latest()->take(5)->get(),
             'nextPayment' => $company->payments()->whereNotNull('charge_date')->orderBy('charge_date')->first(),
         ]);
     }

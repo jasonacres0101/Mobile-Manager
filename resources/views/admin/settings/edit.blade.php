@@ -133,7 +133,7 @@
                             <form method="POST" action="{{ route('admin.settings.connectwise.sync') }}">
                                 @csrf
                                 <input type="hidden" name="sync_type" value="agreements">
-                                <x-primary-button>Sync SIM agreements</x-primary-button>
+                                <x-primary-button>Sync service agreements</x-primary-button>
                             </form>
                             <form method="POST" action="{{ route('admin.settings.connectwise.sync') }}">
                                 @csrf
@@ -142,7 +142,7 @@
                             </form>
                         </div>
 
-                        <p class="text-sm text-gray-600 dark:text-gray-400">The SIM agreement sync still only pulls configured SIM agreement type IDs. Manual buttons run immediately; scheduled syncs continue to use queued jobs.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">The PSA sync only pulls configured service agreement type IDs. Individual additions are then classified using the ConnectWise custom field <span class="font-medium">Micronet - Service Type</span> with values <span class="font-medium">Sim</span> or <span class="font-medium">Fibre</span>.</p>
 
                         @if ($connectwiseLastManualSyncMessage)
                             <p class="text-sm text-gray-600 dark:text-gray-400">{{ $connectwiseLastManualSyncMessage }}</p>
@@ -202,9 +202,10 @@
                         </div>
 
                         <div>
-                            <x-input-label for="connectwise_sim_agreement_type_ids" value="SIM agreement type IDs" />
+                            <x-input-label for="connectwise_sim_agreement_type_ids" value="Service agreement type IDs" />
                             <x-text-input id="connectwise_sim_agreement_type_ids" name="connectwise_sim_agreement_type_ids" type="text" class="mt-1 block w-full" value="{{ old('connectwise_sim_agreement_type_ids', $connectwiseSimAgreementTypeIds) }}" placeholder="12,18" />
                             <x-input-error :messages="$errors->get('connectwise_sim_agreement_type_ids')" class="mt-2" />
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Only these ConnectWise agreement types are synced. SIM vs fibre is decided from the addition custom field, not from the agreement type.</p>
                         </div>
 
                         <div class="flex justify-end">

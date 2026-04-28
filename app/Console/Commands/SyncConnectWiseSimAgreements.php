@@ -20,14 +20,14 @@ class SyncConnectWiseSimAgreements extends Command
      *
      * @var string
      */
-    protected $description = 'Queue sync jobs for ConnectWise PSA SIM agreement types only';
+    protected $description = 'Queue sync jobs for configured ConnectWise PSA SIM and fibre agreement types';
 
     /**
      * Execute the console command.
      */
     public function handle(ConnectWiseService $connectWise): int
     {
-        $agreements = $connectWise->getSimAgreements();
+        $agreements = $connectWise->getServiceAgreements();
 
         foreach ($agreements as $agreement) {
             $this->option('now')
@@ -35,7 +35,7 @@ class SyncConnectWiseSimAgreements extends Command
                 : SyncConnectWiseAgreementJob::dispatch($agreement);
         }
 
-        $this->info(($this->option('now') ? 'Synced ' : 'Queued ').count($agreements).' SIM agreement sync jobs.');
+        $this->info(($this->option('now') ? 'Synced ' : 'Queued ').count($agreements).' configured service agreement sync jobs.');
 
         return self::SUCCESS;
     }

@@ -36,8 +36,8 @@
                             </div>
                             <div>
                                 <div class="text-xs font-semibold uppercase tracking-widest text-[#FFA500]">Admin portal</div>
-                                <h3 class="mt-2 text-2xl font-semibold text-white">SIM operations dashboard</h3>
-                                <p class="mt-1 text-sm text-slate-200">Monitor PSA sync, Jola matching, invoices, and GoCardless collection from one place.</p>
+                                <h3 class="mt-2 text-2xl font-semibold text-white">Service operations dashboard</h3>
+                                <p class="mt-1 text-sm text-slate-200">Monitor SIM and fibre sync, Jola matching, invoices, and GoCardless collection from one place.</p>
                             </div>
                         </div>
                         <a href="{{ route('admin.settings.edit') }}" class="inline-flex items-center justify-center rounded-md bg-[#FFA500] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#020f40] shadow-sm transition hover:bg-[#ffb52e] focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:ring-offset-2 focus:ring-offset-[#020f40]">Settings</a>
@@ -45,11 +45,12 @@
                 </div>
             </section>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 @foreach ([
                     'Companies' => $companyCount,
                     'Agreements' => $agreementCount,
                     'SIMs' => $simCount,
+                    'Fibre' => $fibreCount,
                     'Invoices' => $invoiceCount,
                     'Payments' => $paymentCount,
                 ] as $label => $count)
@@ -108,7 +109,7 @@
                 </div>
                 <div class="flex flex-wrap gap-3">
                     @foreach ([
-                        'connectwise_agreements' => 'Sync PSA agreements',
+                        'connectwise_agreements' => 'Sync PSA services',
                         'connectwise_invoices' => 'Sync PSA invoices',
                         'jola_customers' => 'Sync Jola customers',
                         'jola_sims' => 'Sync Jola SIMs',

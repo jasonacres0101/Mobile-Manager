@@ -54,7 +54,7 @@
                             <div>
                                 <div class="text-xs font-semibold uppercase tracking-widest text-[#FFA500]">Company detail</div>
                                 <h3 class="mt-2 text-2xl font-semibold text-white">{{ $company->name }}</h3>
-                                <p class="mt-1 text-sm text-slate-200">Agreement, SIM, Jola, invoice, and GoCardless information in one place.</p>
+                                <p class="mt-1 text-sm text-slate-200">Agreement, SIM, fibre, Jola, invoice, and GoCardless information in one place.</p>
                             </div>
                         </div>
                         <a href="{{ route('admin.companies.index') }}" class="inline-flex items-center justify-center rounded-md bg-[#FFA500] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#020f40] shadow-sm transition hover:bg-[#ffb52e] focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:ring-offset-2 focus:ring-offset-[#020f40]">Companies</a>
@@ -62,7 +62,7 @@
                 </div>
             </section>
 
-            <div class="grid gap-4 sm:grid-cols-5">
+            <div class="grid gap-4 sm:grid-cols-6">
                 <div class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-800"><div class="text-sm text-gray-500">ConnectWise ID</div><div class="mt-2 text-lg font-semibold text-[#020f40] dark:text-gray-100">{{ $company->connectwise_company_id }}</div><div class="mt-3 h-1 rounded-full bg-orange-100 dark:bg-gray-700"><div class="h-1 w-1/2 rounded-full bg-[#FFA500]"></div></div></div>
                 <div class="rounded-lg border border-cyan-100 bg-cyan-50 p-5 shadow-sm dark:border-cyan-900/60 dark:bg-cyan-950/20"><div class="text-sm text-cyan-900 dark:text-cyan-200">Jola Client</div><div class="mt-2 text-lg font-semibold text-[#020f40] dark:text-cyan-100">
                     @if ($company->jolaCustomer)
@@ -73,6 +73,7 @@
                 </div></div>
                 <div class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-800"><div class="text-sm text-gray-500">Agreements</div><div class="mt-2 text-lg font-semibold text-[#020f40] dark:text-gray-100">{{ $company->agreements->count() }}</div><div class="mt-3 h-1 rounded-full bg-orange-100 dark:bg-gray-700"><div class="h-1 w-2/3 rounded-full bg-[#FFA500]"></div></div></div>
                 <div class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-800"><div class="text-sm text-gray-500">SIMs</div><div class="mt-2 text-lg font-semibold text-[#020f40] dark:text-gray-100">{{ $company->sims->count() }}</div><div class="mt-3 h-1 rounded-full bg-cyan-100 dark:bg-gray-700"><div class="h-1 w-2/3 rounded-full bg-cyan-500"></div></div></div>
+                <div class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-800"><div class="text-sm text-gray-500">Fibre</div><div class="mt-2 text-lg font-semibold text-[#020f40] dark:text-gray-100">{{ $company->fibreConnections->count() }}</div><div class="mt-3 h-1 rounded-full bg-sky-100 dark:bg-gray-700"><div class="h-1 w-2/3 rounded-full bg-sky-500"></div></div></div>
                 <div class="rounded-lg border border-orange-100 bg-orange-50 p-5 shadow-sm dark:border-orange-900/60 dark:bg-orange-950/20"><div class="text-sm text-orange-900 dark:text-orange-200">Balance</div><div class="mt-2 text-lg font-semibold text-[#020f40] dark:text-orange-100">£{{ number_format($company->invoices->sum('balance'), 2) }}</div></div>
             </div>
 
@@ -159,6 +160,27 @@
 
             <section class="space-y-3">
                 <div class="flex items-center gap-3">
+                    <span class="h-3 w-3 rounded-full bg-sky-500"></span>
+                    <h3 class="text-base font-semibold text-[#020f40] dark:text-gray-100">Fibre Details</h3>
+                </div>
+                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                        <thead class="bg-[#020f40]"><tr><th class="px-4 py-3 text-left text-white">Service</th><th class="px-4 py-3 text-left text-white">Circuit</th><th class="px-4 py-3 text-left text-white">Access</th><th class="px-4 py-3 text-left text-white">Bandwidth</th><th class="px-4 py-3 text-left text-white">Address</th><th class="px-4 py-3 text-left text-white">Agreement</th><th class="px-4 py-3 text-right text-white">Monthly</th><th class="px-4 py-3 text-left text-white">Status</th></tr></thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse ($company->fibreConnections as $connection)
+                            <tr class="hover:bg-sky-50/60 dark:hover:bg-gray-900/50"><td class="px-4 py-3 font-medium text-[#020f40] dark:text-gray-100">{{ $connection->service_identifier ?? '-' }}</td><td class="px-4 py-3">{{ $connection->circuit_reference ?? '-' }}</td><td class="px-4 py-3">{{ $connection->access_type ?? '-' }}</td><td class="px-4 py-3">{{ $connection->bandwidth ?? '-' }}</td><td class="px-4 py-3">{{ $connection->location_address ?? '-' }}</td><td class="px-4 py-3">{{ $connection->agreement?->name ?? '-' }}</td><td class="px-4 py-3 text-right font-medium">£{{ number_format($connection->monthly_cost, 2) }}</td><td class="px-4 py-3">{{ $connection->status ?? '-' }}</td></tr>
+                        @empty
+                            <tr><td colspan="8" class="px-4 py-4 text-gray-500">No fibre connections found.</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-3">
+                <div class="flex items-center gap-3">
                     <span class="h-3 w-3 rounded-full bg-cyan-500"></span>
                     <h3 class="text-base font-semibold text-[#020f40] dark:text-gray-100">Jola Details</h3>
                 </div>
@@ -190,7 +212,7 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse ($company->invoices as $invoice)
                             @php($payment = $invoice->payments->sortByDesc('created_at')->first())
-                            <tr class="hover:bg-orange-50/60 dark:hover:bg-gray-900/50"><td class="px-4 py-3"><div class="font-medium text-[#020f40] dark:text-gray-100">{{ $invoice->invoice_number }}</div><div class="text-xs text-gray-500 dark:text-gray-400">{{ $invoice->invoice_date?->format('d M Y') ?? 'No invoice date' }}</div></td><td class="px-4 py-3">{{ $invoice->due_date?->format('d M Y') ?? '-' }}</td><td class="px-4 py-3">{{ $invoice->due_date?->copy()->subDays($company->auto_collect_days_before_due)->format('d M Y') ?? '-' }}</td><td class="px-4 py-3 text-right">£{{ number_format($invoice->total, 2) }}</td><td class="px-4 py-3 text-right font-medium text-[#020f40] dark:text-gray-100">£{{ number_format($invoice->balance, 2) }}</td><td class="px-4 py-3">{!! $statusBadge($invoice->status) !!}</td><td class="px-4 py-3">{!! $statusBadge($invoice->payment_status) !!}</td><td class="px-4 py-3">@if ($payment)<div class="font-mono text-xs text-gray-700 dark:text-gray-300">{{ $payment->gocardless_payment_id }}</div><div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Charge {{ $payment->charge_date?->format('d M Y') ?? '-' }}</div>@else<span class="text-gray-500 dark:text-gray-400">-</span>@endif</td></tr>
+                            <tr class="hover:bg-orange-50/60 dark:hover:bg-gray-900/50"><td class="px-4 py-3"><div class="font-medium text-[#020f40] dark:text-gray-100">{{ $invoice->invoice_number }}</div><div class="text-xs text-gray-500 dark:text-gray-400">{{ $invoice->invoice_date?->format('d M Y') ?? 'No invoice date' }}</div>@if ($invoice->items->isNotEmpty())<div class="mt-3 space-y-2 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/50">@foreach ($invoice->items as $item)<div class="flex items-start justify-between gap-3 text-xs"><div><div class="font-medium text-gray-800 dark:text-gray-100">{{ $item->description ?? 'Invoice line' }}</div><div class="mt-1"><span class="inline-flex rounded-md px-2 py-1 text-xs font-medium {{ $item->service_type === 'fibre' ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100' : ($item->service_type === 'mixed' ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-100' : 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-100') }}">{{ ucfirst($item->service_type ?? 'unknown') }}</span></div></div><div class="text-right text-gray-600 dark:text-gray-300">@if ($item->quantity)<div>Qty {{ rtrim(rtrim(number_format((float) $item->quantity, 2, '.', ''), '0'), '.') }}</div>@endif<div>£{{ number_format((float) ($item->line_total ?? 0), 2) }}</div></div></div>@endforeach</div>@endif</td><td class="px-4 py-3">{{ $invoice->due_date?->format('d M Y') ?? '-' }}</td><td class="px-4 py-3">{{ $invoice->due_date?->copy()->subDays($company->auto_collect_days_before_due)->format('d M Y') ?? '-' }}</td><td class="px-4 py-3 text-right">£{{ number_format($invoice->total, 2) }}</td><td class="px-4 py-3 text-right font-medium text-[#020f40] dark:text-gray-100">£{{ number_format($invoice->balance, 2) }}</td><td class="px-4 py-3">{!! $statusBadge($invoice->status) !!}</td><td class="px-4 py-3">{!! $statusBadge($invoice->payment_status) !!}</td><td class="px-4 py-3">@if ($payment)<div class="font-mono text-xs text-gray-700 dark:text-gray-300">{{ $payment->gocardless_payment_id }}</div><div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Charge {{ $payment->charge_date?->format('d M Y') ?? '-' }}</div>@else<span class="text-gray-500 dark:text-gray-400">-</span>@endif</td></tr>
                         @empty
                             <tr><td colspan="8" class="px-4 py-4 text-gray-500">No invoices found.</td></tr>
                         @endforelse

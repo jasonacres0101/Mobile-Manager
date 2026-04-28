@@ -24,7 +24,7 @@ class InvoiceController extends Controller
 
         return view('admin.invoices.index', [
             'invoices' => Invoice::query()
-                ->with(['company.mandates', 'agreement', 'payments'])
+                ->with(['company.mandates', 'agreement', 'payments', 'items'])
                 ->when($request->filled('q'), function ($query) use ($request) {
                     $search = $request->input('q');
 

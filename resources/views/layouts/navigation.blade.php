@@ -19,6 +19,7 @@
                         <x-nav-link :href="route('admin.companies.index')" :active="request()->routeIs('admin.companies.*')">Companies</x-nav-link>
                         <x-nav-link :href="route('admin.agreements.index')" :active="request()->routeIs('admin.agreements.*')">Agreements</x-nav-link>
                         <x-nav-link :href="route('admin.sims.index')" :active="request()->routeIs('admin.sims.index')">SIMs</x-nav-link>
+                        <x-nav-link :href="route('admin.fibre-connections.index')" :active="request()->routeIs('admin.fibre-connections.*')">Fibre</x-nav-link>
                         <div class="hidden sm:flex sm:items-center">
                             <x-dropdown align="left" width="48">
                                 <x-slot name="trigger">
@@ -42,6 +43,7 @@
                         <x-nav-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">Settings</x-nav-link>
                     @else
                         <x-nav-link :href="route('customer.sims.index')" :active="request()->routeIs('customer.sims.*')">My SIMs</x-nav-link>
+                        <x-nav-link :href="route('customer.fibre-connections.index')" :active="request()->routeIs('customer.fibre-connections.*')">My Fibre</x-nav-link>
                         <x-nav-link :href="route('customer.invoices.index')" :active="request()->routeIs('customer.invoices.*')">My Invoices</x-nav-link>
                         <x-nav-link :href="route('customer.direct-debit.setup')" :active="request()->routeIs('customer.direct-debit.*')">Direct Debit</x-nav-link>
                     @endif
@@ -104,6 +106,7 @@
                 <x-responsive-nav-link :href="route('admin.companies.index')" :active="request()->routeIs('admin.companies.*')">Companies</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.agreements.index')" :active="request()->routeIs('admin.agreements.*')">Agreements</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.sims.index')" :active="request()->routeIs('admin.sims.index')">SIMs</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.fibre-connections.index')" :active="request()->routeIs('admin.fibre-connections.*')">Fibre</x-responsive-nav-link>
                 <div class="px-4 pt-3 text-xs font-semibold uppercase tracking-wide text-[#020f40] dark:text-orange-200">Jola</div>
                 <x-responsive-nav-link :href="route('admin.sims.jola')" :active="request()->routeIs('admin.sims.jola')">Jola SIMs</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.jola-customers.index')" :active="request()->routeIs('admin.jola-customers.*')">Jola Customers</x-responsive-nav-link>
@@ -113,6 +116,7 @@
                 <x-responsive-nav-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">Settings</x-responsive-nav-link>
             @else
                 <x-responsive-nav-link :href="route('customer.sims.index')" :active="request()->routeIs('customer.sims.*')">My SIMs</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('customer.fibre-connections.index')" :active="request()->routeIs('customer.fibre-connections.*')">My Fibre</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('customer.invoices.index')" :active="request()->routeIs('customer.invoices.*')">My Invoices</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('customer.direct-debit.setup')" :active="request()->routeIs('customer.direct-debit.*')">Direct Debit</x-responsive-nav-link>
             @endif

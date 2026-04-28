@@ -1,8 +1,8 @@
 # Mobile Manager
 
-Laravel 12 customer and admin portal for customer SIM management, ConnectWise PSA invoice visibility, and GoCardless Direct Debit collection.
+Laravel 12 customer and admin portal for customer SIM and fibre management, ConnectWise PSA invoice visibility, and GoCardless Direct Debit collection.
 
-ConnectWise PSA remains the source of truth for companies, agreements, additions/SIMs, and invoices. This app only syncs agreements whose ConnectWise agreement type ID is listed in `CONNECTWISE_SIM_AGREEMENT_TYPE_IDS`.
+ConnectWise PSA remains the source of truth for companies, agreements, additions, and invoices. This app only syncs agreements whose ConnectWise agreement type ID is listed in `CONNECTWISE_SIM_AGREEMENT_TYPE_IDS`, then classifies each synced addition using the ConnectWise custom field `Micronet - Service Type`.
 
 ## Stack
 
@@ -63,7 +63,7 @@ CONNECTWISE_CLIENT_ID=
 CONNECTWISE_SIM_AGREEMENT_TYPE_IDS=12,18
 ```
 
-`CONNECTWISE_SIM_AGREEMENT_TYPE_IDS` is the allow-list for SIM agreement types. The sync builds this ConnectWise condition dynamically:
+`CONNECTWISE_SIM_AGREEMENT_TYPE_IDS` is the allow-list for service agreement types. The sync builds this ConnectWise condition dynamically:
 
 ```text
 type/id=12 OR type/id=18
@@ -71,9 +71,24 @@ type/id=12 OR type/id=18
 
 No command in this app syncs all agreements.
 
-For setup, create a dedicated ConnectWise PSA API member, generate public/private API keys, and enter the base URL, company ID, public key, private key, client ID, and SIM agreement type IDs in `/admin/settings?tab=connectwise`.
+For setup, create a dedicated ConnectWise PSA API member, generate public/private API keys, and enter the base URL, company ID, public key, private key, client ID, and service agreement type IDs in `/admin/settings?tab=connectwise`.
 
-Only add agreement type IDs that are genuinely for SIM agreements. The sync must stay limited to the configured SIM agreement type allow-list.
+Only add agreement type IDs that are genuinely for the service agreements you want in this portal. The sync must stay limited to the configured agreement type allow-list and must never sync all agreements.
+
+Inside ConnectWise PSA, each synced agreement addition should use the custom field:
+
+```text
+Micronet - Service Type
+```
+
+Allowed values:
+
+```text
+Sim
+Fibre
+```
+
+This is how the portal decides whether an addition becomes a SIM record or a fibre connection.
 
 Configure GoCardless:
 
@@ -140,19 +155,19 @@ Scheduled tasks:
 
 ## Sync Commands
 
-Sync SIM agreements, SIM additions, and invoices:
+Sync configured service agreements, additions, and invoices:
 
 ```bash
 php artisan sync:connectwise-sim-agreements
 ```
 
-Refresh invoices for existing SIM agreements only:
+Refresh invoices for existing synced service agreements only:
 
 ```bash
 php artisan sync:connectwise-invoices
 ```
 
-The agreement sync uses ConnectWise pagination and always requests only configured SIM agreement types from PSA. Each queued agreement job re-checks the type allow-list before writing data.
+The agreement sync uses ConnectWise pagination and always requests only configured agreement types from PSA. Each queued agreement job re-checks the type allow-list before writing data, then reads `Micronet - Service Type` on each addition to split SIM and fibre records safely.
 
 Sync Jola SIMs from Mobile Manager:
 
@@ -235,6 +250,7 @@ Admin routes require `role=admin`:
 - `/admin/companies`
 - `/admin/agreements`
 - `/admin/sims`
+- `/admin/fibre-connections`
 - `/admin/jola-sims`
 - `/admin/invoices`
 - `/admin/payments`
@@ -243,6 +259,7 @@ Customer routes require `role=customer` and only use the authenticated user's `c
 
 - `/customer`
 - `/customer/sims`
+- `/customer/fibre-connections`
 - `/customer/invoices`
 - `/customer/direct-debit/setup`
 

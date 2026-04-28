@@ -149,16 +149,16 @@ class SettingsController extends Controller
     public function testConnectWise(AppSettings $settings, ConnectWiseService $connectWise)
     {
         try {
-            $typeIds = $connectWise->simAgreementTypeIds();
+            $typeIds = $connectWise->serviceAgreementTypeIds();
 
             if ($typeIds === []) {
-                throw new RuntimeException('No SIM agreement type IDs are configured.');
+                throw new RuntimeException('No service agreement type IDs are configured.');
             }
 
-            $agreements = $connectWise->getSimAgreements();
+            $agreements = $connectWise->getServiceAgreements();
 
             $settings->set('connectwise.last_test_status', 'success');
-            $settings->set('connectwise.last_test_message', 'Connected successfully. Found '.count($agreements).' SIM agreement record(s) for type IDs '.implode(',', $typeIds).'.');
+            $settings->set('connectwise.last_test_message', 'Connected successfully. Found '.count($agreements).' service agreement record(s) for type IDs '.implode(',', $typeIds).'.');
             $settings->set('connectwise.last_tested_at', now()->toDateTimeString());
 
             return redirect()->route('admin.settings.edit', ['tab' => 'connectwise'])->with('status', 'ConnectWise PSA test successful.');
@@ -171,7 +171,7 @@ class SettingsController extends Controller
 
             return redirect()
                 ->route('admin.settings.edit', ['tab' => 'connectwise'])
-                ->withErrors(['connectwise_test' => 'ConnectWise PSA test failed. Check the base URL, API member keys, client ID, permissions, and SIM agreement type IDs.']);
+                ->withErrors(['connectwise_test' => 'ConnectWise PSA test failed. Check the base URL, API member keys, client ID, permissions, and the configured service agreement type IDs.']);
         }
     }
 

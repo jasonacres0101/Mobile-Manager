@@ -21,14 +21,14 @@ class SyncConnectWiseInvoices extends Command
      *
      * @var string
      */
-    protected $description = 'Queue invoice refreshes for existing SIM agreements only';
+    protected $description = 'Queue invoice refreshes for existing configured SIM and fibre agreements';
 
     /**
      * Execute the console command.
      */
     public function handle(ConnectWiseService $connectWise): int
     {
-        $typeIds = $connectWise->simAgreementTypeIds();
+        $typeIds = $connectWise->serviceAgreementTypeIds();
 
         $agreements = Agreement::query()
             ->whereIn('connectwise_agreement_type_id', $typeIds)
@@ -40,7 +40,7 @@ class SyncConnectWiseInvoices extends Command
                 : SyncConnectWiseInvoicesForAgreementJob::dispatch($agreementId);
         }
 
-        $this->info(($this->option('now') ? 'Synced ' : 'Queued ').$agreements->count().' SIM agreement invoice sync jobs.');
+        $this->info(($this->option('now') ? 'Synced ' : 'Queued ').$agreements->count().' configured service agreement invoice sync jobs.');
 
         return self::SUCCESS;
     }

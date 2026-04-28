@@ -24,7 +24,7 @@
                         <div>
                             <div class="text-xs font-semibold uppercase tracking-widest text-[#FFA500]">Admin portal</div>
                             <h3 class="mt-2 text-2xl font-semibold text-white">Companies</h3>
-                            <p class="mt-1 text-sm text-slate-200">Customer records synced from ConnectWise PSA with SIM, invoice, and payment links.</p>
+                            <p class="mt-1 text-sm text-slate-200">Customer records synced from ConnectWise PSA with SIM, fibre, invoice, and payment links.</p>
                         </div>
                     </div>
                 </div>
@@ -51,6 +51,7 @@
                         <th class="px-4 py-3 text-left text-white">GoCardless</th>
                         <th class="px-4 py-3 text-left">{!! $sortLink('agreements_count', 'Agreements') !!}</th>
                         <th class="px-4 py-3 text-left">{!! $sortLink('sims_count', 'SIMs') !!}</th>
+                        <th class="px-4 py-3 text-left">{!! $sortLink('fibre_connections_count', 'Fibre') !!}</th>
                         <th class="px-4 py-3 text-left">{!! $sortLink('invoices_count', 'Invoices') !!}</th>
                     </tr></thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -61,10 +62,11 @@
                             <td class="px-4 py-3 font-mono text-xs">{{ $company->gocardless_customer_id ?? '-' }}</td>
                             <td class="px-4 py-3"><span class="inline-flex rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-800 dark:bg-orange-900/50 dark:text-orange-100">{{ $company->agreements_count }}</span></td>
                             <td class="px-4 py-3"><span class="inline-flex rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-medium text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-100">{{ $company->sims_count }}</span></td>
+                            <td class="px-4 py-3"><span class="inline-flex rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-800 dark:bg-sky-900/50 dark:text-sky-100">{{ $company->fibre_connections_count }}</span></td>
                             <td class="px-4 py-3"><span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-[#020f40] dark:bg-gray-900 dark:text-gray-100">{{ $company->invoices_count }}</span></td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-4 py-6 text-center text-gray-500">No companies found.</td></tr>
+                        <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">No companies found.</td></tr>
                     @endforelse
                     </tbody>
                 </table>

@@ -28,6 +28,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/companies/{company}/gocardless/refresh-payments', [Admin\CompanyController::class, 'refreshGoCardlessPayments'])->name('companies.gocardless.refresh-payments');
     Route::get('/agreements', [Admin\AgreementController::class, 'index'])->name('agreements.index');
     Route::get('/sims', [Admin\SimController::class, 'index'])->name('sims.index');
+    Route::get('/fibre-connections', [Admin\FibreConnectionController::class, 'index'])->name('fibre-connections.index');
     Route::get('/jola-sims', [Admin\SimController::class, 'jola'])->name('sims.jola');
     Route::get('/jola-customers', [Admin\JolaCustomerController::class, 'index'])->name('jola-customers.index');
     Route::post('/jola-customers/sync', [Admin\JolaCustomerController::class, 'sync'])->name('jola-customers.sync');
@@ -58,6 +59,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/', Customer\DashboardController::class)->name('dashboard');
     Route::get('/sims', [Customer\SimController::class, 'index'])->name('sims.index');
+    Route::get('/fibre-connections', [Customer\FibreConnectionController::class, 'index'])->name('fibre-connections.index');
     Route::get('/invoices', [Customer\InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/direct-debit/setup', [Customer\DirectDebitController::class, 'setup'])->name('direct-debit.setup');
     Route::post('/direct-debit/refresh', [Customer\DirectDebitController::class, 'refresh'])->name('direct-debit.refresh');

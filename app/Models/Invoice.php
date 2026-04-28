@@ -40,8 +40,25 @@ class Invoice extends Model
         return $this->belongsTo(Agreement::class);
     }
 
+    public function getServiceTypeAttribute(): string
+    {
+        $simCount = $this->agreement?->sims()?->count() ?? 0;
+        $fibreCount = $this->agreement?->fibreConnections()?->count() ?? 0;
+
+        return match (true) {
+            $simCount > 0 && $fibreCount > 0 => 'mixed',
+            $fibreCount > 0 => 'fibre',
+            default => 'sim',
+        };
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(InvoiceItem::class);
     }
 }

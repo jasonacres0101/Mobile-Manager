@@ -20,6 +20,17 @@
 
         return '<a href="'.$url.'" class="font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-300">'.e($label.$arrow).'</a>';
     };
+
+    $serviceBadge = function (string $serviceType) {
+        $classes = match ($serviceType) {
+            'fibre' => 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100',
+            'mixed' => 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-100',
+            'unknown' => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
+            default => 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-100',
+        };
+
+        return '<span class="inline-flex rounded-md px-2 py-1 text-xs font-medium '.$classes.'">'.e(ucfirst($serviceType)).'</span>';
+    };
 @endphp
 
 <x-app-layout>
@@ -57,6 +68,7 @@
                         <tr>
                             <th class="px-4 py-3 text-left">Company</th>
                             <th class="px-4 py-3 text-left">{!! $sortLink('invoice_number', 'Invoice') !!}</th>
+                            <th class="px-4 py-3 text-left">Service</th>
                             <th class="px-4 py-3 text-left">{!! $sortLink('due_date', 'Due') !!}</th>
                             <th class="px-4 py-3 text-right">{!! $sortLink('total', 'Total') !!}</th>
                             <th class="px-4 py-3 text-right">{!! $sortLink('balance', 'Balance') !!}</th>
@@ -76,6 +88,28 @@
                             <td class="px-4 py-3">
                                 <div class="font-medium text-gray-900 dark:text-gray-100">{{ $invoice->invoice_number }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ $invoice->invoice_date?->format('d M Y') ?? 'No invoice date' }}</div>
+                                @if ($invoice->items->isNotEmpty())
+                                    <div class="mt-3 space-y-2 rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/50">
+                                        @foreach ($invoice->items as $item)
+                                            <div class="flex items-start justify-between gap-3 text-xs">
+                                                <div>
+                                                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ $item->description ?? 'Invoice line' }}</div>
+                                                    <div class="mt-1">{!! $serviceBadge($item->service_type ?? 'unknown') !!}</div>
+                                                </div>
+                                                <div class="text-right text-gray-600 dark:text-gray-300">
+                                                    @if ($item->quantity)
+                                                        <div>Qty {{ rtrim(rtrim(number_format((float) $item->quantity, 2, '.', ''), '0'), '.') }}</div>
+                                                    @endif
+                                                    <div>£{{ number_format((float) ($item->line_total ?? 0), 2) }}</div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                {!! $serviceBadge($invoice->service_type) !!}
+                                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $invoice->agreement?->name ?? 'No agreement' }}</div>
                             </td>
                             <td class="px-4 py-3">{{ $invoice->due_date?->format('d M Y') ?? '-' }}</td>
                             <td class="px-4 py-3 text-right">£{{ number_format($invoice->total, 2) }}</td>
@@ -104,7 +138,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No invoices found.</td></tr>
+                        <tr><td colspan="10" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No invoices found.</td></tr>
                     @endforelse
                     </tbody>
                 </table>

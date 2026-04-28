@@ -68,8 +68,8 @@ class AdminSettingsTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
 
         $connectWise = Mockery::mock(ConnectWiseService::class);
-        $connectWise->shouldReceive('simAgreementTypeIds')->once()->andReturn([12, 18]);
-        $connectWise->shouldReceive('getSimAgreements')->once()->andReturn([
+        $connectWise->shouldReceive('serviceAgreementTypeIds')->once()->andReturn([12, 18]);
+        $connectWise->shouldReceive('getServiceAgreements')->once()->andReturn([
             ['id' => 1001],
             ['id' => 1002],
         ]);
@@ -80,7 +80,7 @@ class AdminSettingsTest extends TestCase
             ->assertRedirect(route('admin.settings.edit', ['tab' => 'connectwise']));
 
         $this->assertSame('success', AppSetting::getValue('connectwise.last_test_status'));
-        $this->assertSame('Connected successfully. Found 2 SIM agreement record(s) for type IDs 12,18.', AppSetting::getValue('connectwise.last_test_message'));
+        $this->assertSame('Connected successfully. Found 2 service agreement record(s) for type IDs 12,18.', AppSetting::getValue('connectwise.last_test_message'));
         $this->assertNotNull(AppSetting::getValue('connectwise.last_tested_at'));
     }
 
@@ -89,7 +89,7 @@ class AdminSettingsTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
 
         Artisan::shouldReceive('call')->once()->with('sync:connectwise-sim-agreements', ['--now' => true])->andReturn(0);
-        Artisan::shouldReceive('output')->once()->andReturn('Synced 3 SIM agreement sync jobs.');
+        Artisan::shouldReceive('output')->once()->andReturn('Synced 3 configured service agreement sync jobs.');
 
         $this->actingAs($admin)
             ->post(route('admin.settings.connectwise.sync'), [
@@ -98,7 +98,7 @@ class AdminSettingsTest extends TestCase
             ->assertRedirect(route('admin.settings.edit', ['tab' => 'connectwise']));
 
         $this->assertSame('success', AppSetting::getValue('connectwise.last_manual_sync_status'));
-        $this->assertSame('Synced 3 SIM agreement sync jobs.', AppSetting::getValue('connectwise.last_manual_sync_message'));
+        $this->assertSame('Synced 3 configured service agreement sync jobs.', AppSetting::getValue('connectwise.last_manual_sync_message'));
         $this->assertNotNull(AppSetting::getValue('connectwise.last_manual_sync_at'));
     }
 

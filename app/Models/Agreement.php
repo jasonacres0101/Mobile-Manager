@@ -10,6 +10,7 @@ class Agreement extends Model
         'company_id',
         'connectwise_agreement_id',
         'connectwise_agreement_type_id',
+        'service_type',
         'name',
         'status',
         'start_date',
@@ -34,6 +35,11 @@ class Agreement extends Model
     public function sims()
     {
         return $this->hasMany(Sim::class);
+    }
+
+    public function fibreConnections()
+    {
+        return $this->hasMany(FibreConnection::class);
     }
 
     public function invoices()

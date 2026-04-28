@@ -42,6 +42,7 @@ return [
         'private_key' => env('CONNECTWISE_PRIVATE_KEY'),
         'client_id' => env('CONNECTWISE_CLIENT_ID'),
         'sim_agreement_type_ids' => array_filter(explode(',', env('CONNECTWISE_SIM_AGREEMENT_TYPE_IDS', ''))),
+        'fibre_agreement_type_ids' => array_filter(explode(',', env('CONNECTWISE_FIBRE_AGREEMENT_TYPE_IDS', ''))),
     ],
 
     'gocardless' => [

@@ -34,7 +34,7 @@
                             <div>
                                 <div class="text-xs font-semibold uppercase tracking-widest text-[#FFA500]">Customer portal</div>
                                 <h3 class="mt-2 text-2xl font-semibold text-white">{{ $company->name }}</h3>
-                                <p class="mt-1 text-sm text-slate-200">View SIMs, invoices, balances, and Direct Debit status in your portal.</p>
+                                <p class="mt-1 text-sm text-slate-200">View SIM and fibre services, invoices, balances, and Direct Debit status in your portal.</p>
                             </div>
                         </div>
                         <a href="{{ route('customer.direct-debit.setup') }}" class="inline-flex items-center justify-center rounded-md bg-[#FFA500] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#020f40] shadow-sm transition hover:bg-[#ffb52e] focus:outline-none focus:ring-2 focus:ring-[#FFA500] focus:ring-offset-2 focus:ring-offset-[#020f40]">Direct Debit</a>
@@ -42,10 +42,14 @@
                 </div>
             </section>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <a href="{{ route('customer.sims.index') }}" class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm transition hover:border-[#FFA500] hover:bg-orange-50 dark:border-white/10 dark:bg-gray-800 dark:hover:bg-gray-800">
                     <div class="text-sm text-gray-500 dark:text-gray-400">Active SIM estate</div>
                     <div class="mt-2 text-3xl font-semibold text-[#020f40] dark:text-gray-100">{{ $simCount }}</div>
+                </a>
+                <a href="{{ route('customer.fibre-connections.index') }}" class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm transition hover:border-[#FFA500] hover:bg-orange-50 dark:border-white/10 dark:bg-gray-800 dark:hover:bg-gray-800">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Fibre connections</div>
+                    <div class="mt-2 text-3xl font-semibold text-[#020f40] dark:text-gray-100">{{ $fibreCount }}</div>
                 </a>
                 <a href="{{ route('customer.invoices.index') }}" class="rounded-lg border border-[#020f40]/10 bg-white p-5 shadow-sm transition hover:border-[#FFA500] hover:bg-orange-50 dark:border-white/10 dark:bg-gray-800 dark:hover:bg-gray-800">
                     <div class="text-sm text-gray-500 dark:text-gray-400">Invoices</div>
@@ -62,7 +66,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-6 lg:grid-cols-2">
+            <div class="grid gap-6 lg:grid-cols-3">
                 <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
                     <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100">Recent Invoices</h3>
@@ -106,6 +110,26 @@
                             </div>
                         @empty
                             <div class="px-5 py-6 text-sm text-gray-500 dark:text-gray-400">No SIMs found.</div>
+                        @endforelse
+                    </div>
+                </section>
+
+                <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Recent Fibre</h3>
+                        <a href="{{ route('customer.fibre-connections.index') }}" class="text-sm text-indigo-600 hover:underline dark:text-indigo-300">View all</a>
+                    </div>
+                    <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse ($recentFibreConnections as $connection)
+                            <div class="flex items-center justify-between gap-4 px-5 py-4">
+                                <div>
+                                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $connection->service_identifier ?? 'Unnamed service' }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $connection->access_type ?? '-' }} · {{ $connection->bandwidth ?? '-' }}</div>
+                                </div>
+                                <div class="text-right text-sm text-gray-600 dark:text-gray-300">£{{ number_format($connection->monthly_cost, 2) }}</div>
+                            </div>
+                        @empty
+                            <div class="px-5 py-6 text-sm text-gray-500 dark:text-gray-400">No fibre connections found.</div>
                         @endforelse
                     </div>
                 </section>

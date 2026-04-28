@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Agreement;
 use App\Models\AppSetting;
 use App\Models\Company;
+use App\Models\FibreConnection;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Sim;
@@ -26,6 +27,7 @@ class DashboardController extends Controller
             'companyCount' => Company::count(),
             'agreementCount' => Agreement::count(),
             'simCount' => Sim::count(),
+            'fibreCount' => FibreConnection::count(),
             'invoiceCount' => Invoice::count(),
             'paymentCount' => Payment::count(),
             'openBalance' => Invoice::sum('balance'),

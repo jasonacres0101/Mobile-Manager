@@ -34,10 +34,11 @@ class AgreementController extends Controller
                 })
                 ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
                 ->when($request->filled('type_id'), fn ($query) => $query->where('connectwise_agreement_type_id', $request->input('type_id')))
+                ->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->input('service_type')))
                 ->orderBy($sort, $direction)
                 ->paginate($perPage)
                 ->withQueryString(),
-            'filters' => $request->only(['q', 'status', 'type_id', 'sort', 'direction', 'per_page']),
+            'filters' => $request->only(['q', 'status', 'type_id', 'service_type', 'sort', 'direction', 'per_page']),
             'statuses' => Agreement::query()->whereNotNull('status')->distinct()->orderBy('status')->pluck('status'),
             'typeIds' => Agreement::query()->whereNotNull('connectwise_agreement_type_id')->distinct()->orderBy('connectwise_agreement_type_id')->pluck('connectwise_agreement_type_id'),
         ]);
