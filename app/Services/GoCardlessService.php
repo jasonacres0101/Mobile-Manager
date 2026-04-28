@@ -110,35 +110,68 @@ class GoCardlessService
 
     public function mandateIdFromBillingRequest(string $billingRequestId): ?string
     {
+        return $this->billingRequestSummary($billingRequestId)['mandate_id'];
+    }
+
+    public function billingRequestSummary(string $billingRequestId): array
+    {
         $billingRequest = $this->client()->billingRequests()->get($billingRequestId);
 
-        return $billingRequest->links->mandate ?? null;
+        return [
+            'mandate_id' => $billingRequest->links->mandate ?? null,
+            'customer_id' => $billingRequest->links->customer ?? null,
+        ];
     }
 
     public function refreshMandatesForCompany(Company $company): int
     {
-        if (! $company->gocardless_customer_id) {
-            return 0;
+        $count = 0;
+
+        if ($company->gocardless_customer_id) {
+            $response = $this->client()->mandates()->list([
+                'params' => [
+                    'customer' => $company->gocardless_customer_id,
+                    'limit' => 100,
+                ],
+            ]);
+
+            foreach ($response->records as $mandate) {
+                GocardlessMandate::updateOrCreate(
+                    ['mandate_id' => $mandate->id],
+                    [
+                        'company_id' => $company->id,
+                        'status' => $mandate->status,
+                    ],
+                );
+            }
+
+            $count += count($response->records);
         }
 
-        $response = $this->client()->mandates()->list([
-            'params' => [
-                'customer' => $company->gocardless_customer_id,
-                'limit' => 100,
-            ],
+        $refreshedLocalMandates = 0;
+
+        foreach ($company->mandates()->get() as $mandate) {
+            $refreshed = $this->refreshMandate($mandate);
+
+            if (! $company->gocardless_customer_id && isset($refreshed->links->customer)) {
+                $company->update(['gocardless_customer_id' => $refreshed->links->customer]);
+            }
+
+            $refreshedLocalMandates++;
+        }
+
+        return max($count, $refreshedLocalMandates);
+    }
+
+    public function refreshMandate(GocardlessMandate $mandate): object
+    {
+        $goCardlessMandate = $this->client()->mandates()->get($mandate->mandate_id);
+
+        $mandate->update([
+            'status' => $goCardlessMandate->status ?? $mandate->status,
         ]);
 
-        foreach ($response->records as $mandate) {
-            GocardlessMandate::updateOrCreate(
-                ['mandate_id' => $mandate->id],
-                [
-                    'company_id' => $company->id,
-                    'status' => $mandate->status,
-                ],
-            );
-        }
-
-        return count($response->records);
+        return $goCardlessMandate;
     }
 
     public function refreshPayment(Payment $payment): Payment

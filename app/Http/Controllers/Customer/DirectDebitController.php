@@ -52,7 +52,12 @@ class DirectDebitController extends Controller
         $billingRequestId = $request->session()->pull('gocardless_billing_request_id');
 
         if ($company && $billingRequestId) {
-            $mandateId = $goCardless->mandateIdFromBillingRequest($billingRequestId);
+            $summary = $goCardless->billingRequestSummary($billingRequestId);
+            $mandateId = $summary['mandate_id'] ?? null;
+
+            if (! $company->gocardless_customer_id && ! empty($summary['customer_id'])) {
+                $company->update(['gocardless_customer_id' => $summary['customer_id']]);
+            }
 
             if ($mandateId) {
                 GocardlessMandate::updateOrCreate(
