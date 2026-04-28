@@ -23,6 +23,7 @@ class CustomerPortalTest extends TestCase
         $company = Company::create([
             'name' => 'Test Customer Ltd',
             'connectwise_company_id' => 900001,
+            'gocardless_billing_request_id' => 'BRQ123',
         ]);
         $otherCompany = Company::create([
             'name' => 'Other Customer Ltd',
@@ -137,6 +138,7 @@ class CustomerPortalTest extends TestCase
             'mandate_id' => 'MD999',
             'status' => 'created',
         ]);
+        $this->assertNull($company->fresh()->gocardless_billing_request_id);
     }
 
     public function test_guest_direct_debit_callback_can_use_signed_company_and_billing_request(): void

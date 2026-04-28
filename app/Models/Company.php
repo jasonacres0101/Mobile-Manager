@@ -11,6 +11,7 @@ class Company extends Model
         'connectwise_company_id',
         'mobilemanager_customer_id',
         'gocardless_customer_id',
+        'gocardless_billing_request_id',
         'auto_collect_enabled',
         'auto_collect_days_before_due',
         'auto_collect_min_balance',

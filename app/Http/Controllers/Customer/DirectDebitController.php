@@ -30,6 +30,10 @@ class DirectDebitController extends Controller
                 $request->user()->email,
             );
 
+            $company->update([
+                'gocardless_billing_request_id' => $flow['billing_request_id'],
+            ]);
+
             return redirect()->away($flow['redirect_url']);
         }
 
@@ -74,6 +78,8 @@ class DirectDebitController extends Controller
                         'status' => 'created',
                     ],
                 );
+
+                $company->update(['gocardless_billing_request_id' => null]);
             }
         }
 

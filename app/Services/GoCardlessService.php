@@ -131,6 +131,28 @@ class GoCardlessService
     {
         $count = 0;
 
+        if ($company->gocardless_billing_request_id) {
+            $summary = $this->billingRequestSummary($company->gocardless_billing_request_id);
+            $customerId = $summary['customer_id'] ?? null;
+            $mandateId = $summary['mandate_id'] ?? null;
+
+            if (! $company->gocardless_customer_id && $customerId) {
+                $company->update(['gocardless_customer_id' => $customerId]);
+            }
+
+            if ($mandateId) {
+                GocardlessMandate::updateOrCreate(
+                    ['mandate_id' => $mandateId],
+                    [
+                        'company_id' => $company->id,
+                        'status' => 'created',
+                    ],
+                );
+
+                $count++;
+            }
+        }
+
         if ($company->gocardless_customer_id) {
             $response = $this->client()->mandates()->list([
                 'params' => [
