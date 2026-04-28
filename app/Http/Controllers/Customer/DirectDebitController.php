@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\GocardlessMandate;
 use App\Services\GoCardlessService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DirectDebitController extends Controller
 {
@@ -22,6 +23,11 @@ class DirectDebitController extends Controller
             );
 
             $request->session()->put('gocardless_billing_request_id', $flow['billing_request_id']);
+            Cache::put(
+                $this->billingRequestCacheKey($company->id),
+                $flow['billing_request_id'],
+                now()->addDay(),
+            );
 
             return redirect()->away($flow['redirect_url']);
         }
@@ -51,6 +57,10 @@ class DirectDebitController extends Controller
         $company = $request->user()->company;
         $billingRequestId = $request->session()->pull('gocardless_billing_request_id');
 
+        if (! $billingRequestId && $company) {
+            $billingRequestId = Cache::pull($this->billingRequestCacheKey($company->id));
+        }
+
         if ($company && $billingRequestId) {
             $summary = $goCardless->billingRequestSummary($billingRequestId);
             $mandateId = $summary['mandate_id'] ?? null;
@@ -73,5 +83,10 @@ class DirectDebitController extends Controller
         return redirect()
             ->route('customer.direct-debit.setup')
             ->with('status', 'Direct Debit setup returned from GoCardless. Use refresh status if the mandate is not shown yet.');
+    }
+
+    private function billingRequestCacheKey(int $companyId): string
+    {
+        return "company:{$companyId}:gocardless_billing_request_id";
     }
 }
