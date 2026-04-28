@@ -62,27 +62,40 @@ class GoCardlessService
 
     public function createBillingRequestFlow(Company $company, string $redirectUri, ?string $email = null): array
     {
-        $customerId = $this->ensureCustomer($company, $email);
+        $billingRequestParams = [
+            'mandate_request' => [
+                'scheme' => 'bacs',
+                'currency' => 'GBP',
+            ],
+        ];
+
+        if ($company->gocardless_customer_id) {
+            $billingRequestParams['links'] = [
+                'customer' => $company->gocardless_customer_id,
+            ];
+        }
 
         $billingRequest = $this->client()->billingRequests()->create([
-            'params' => [
-                'mandate_request' => [
-                    'scheme' => 'bacs',
-                    'currency' => 'GBP',
-                ],
-                'links' => [
-                    'customer' => $customerId,
-                ],
-            ],
+            'params' => $billingRequestParams,
             'headers' => [
                 'Idempotency-Key' => 'billing-request-'.$company->id.'-'.Str::uuid(),
             ],
+        ]);
+
+        if (! $company->gocardless_customer_id && isset($billingRequest->links->customer)) {
+            $company->update(['gocardless_customer_id' => $billingRequest->links->customer]);
+        }
+
+        $prefilledCustomer = array_filter([
+            'company_name' => $company->name,
+            'email' => $email,
         ]);
 
         $flow = $this->client()->billingRequestFlows()->create([
             'params' => [
                 'redirect_uri' => $redirectUri,
                 'exit_uri' => route('customer.direct-debit.setup'),
+                'prefilled_customer' => $prefilledCustomer,
                 'links' => [
                     'billing_request' => $billingRequest->id,
                 ],
