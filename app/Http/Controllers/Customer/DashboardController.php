@@ -19,7 +19,7 @@ class DashboardController extends Controller
             'fibreCount' => $company->fibreConnections()->count(),
             'invoiceCount' => $company->invoices()->count(),
             'openBalance' => $company->invoices()->sum('balance'),
-            'mandate' => $company->mandates()->latest()->first(),
+            'mandate' => $company->currentMandate(),
             'recentInvoices' => $company->invoices()->with('payments')->latest()->take(5)->get(),
             'recentSims' => $company->sims()->latest()->take(5)->get(),
             'recentFibreConnections' => $company->fibreConnections()->latest()->take(5)->get(),

@@ -236,4 +236,35 @@ class CustomerPortalTest extends TestCase
             ->assertSee('MD-ACTIVE')
             ->assertDontSee('MD-SUBMITTED');
     }
+
+    public function test_customer_dashboard_prefers_active_mandate(): void
+    {
+        $company = Company::create([
+            'name' => 'Test Customer Ltd',
+            'connectwise_company_id' => 900001,
+        ]);
+
+        $user = User::factory()->create([
+            'company_id' => $company->id,
+            'role' => 'customer',
+        ]);
+
+        GocardlessMandate::create([
+            'company_id' => $company->id,
+            'mandate_id' => 'MD-ACTIVE',
+            'status' => 'active',
+        ]);
+
+        GocardlessMandate::create([
+            'company_id' => $company->id,
+            'mandate_id' => 'MD-SUBMITTED',
+            'status' => 'submitted',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('customer.dashboard'))
+            ->assertOk()
+            ->assertSee('active')
+            ->assertDontSee('submitted');
+    }
 }
