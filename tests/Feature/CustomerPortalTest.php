@@ -122,6 +122,10 @@ class CustomerPortalTest extends TestCase
                 'mandate_id' => 'MD999',
                 'customer_id' => 'CU999',
             ]);
+        $mock->shouldReceive('refreshMandate')
+            ->once()
+            ->with(Mockery::on(fn ($mandate) => $mandate instanceof GocardlessMandate && $mandate->mandate_id === 'MD999'))
+            ->andReturn((object) ['status' => 'pending_submission']);
 
         $this->app->instance(GoCardlessService::class, $mock);
 
@@ -156,6 +160,10 @@ class CustomerPortalTest extends TestCase
                 'mandate_id' => 'MD456',
                 'customer_id' => 'CU456',
             ]);
+        $mock->shouldReceive('refreshMandate')
+            ->once()
+            ->with(Mockery::on(fn ($mandate) => $mandate instanceof GocardlessMandate && $mandate->mandate_id === 'MD456'))
+            ->andReturn((object) ['status' => 'pending_submission']);
 
         $this->app->instance(GoCardlessService::class, $mock);
 

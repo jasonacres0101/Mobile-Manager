@@ -71,13 +71,19 @@ class DirectDebitController extends Controller
             }
 
             if ($mandateId) {
-                GocardlessMandate::updateOrCreate(
+                $mandate = GocardlessMandate::updateOrCreate(
                     ['mandate_id' => $mandateId],
                     [
                         'company_id' => $company->id,
                         'status' => 'created',
                     ],
                 );
+
+                try {
+                    $goCardless->refreshMandate($mandate);
+                } catch (\Throwable) {
+                    // Some mandates are not immediately queryable on return; manual refresh/webhooks remain a fallback.
+                }
 
                 $company->update(['gocardless_billing_request_id' => null]);
             }
