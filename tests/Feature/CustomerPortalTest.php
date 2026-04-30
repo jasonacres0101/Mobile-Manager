@@ -180,4 +180,29 @@ class CustomerPortalTest extends TestCase
             'status' => 'created',
         ]);
     }
+
+    public function test_customer_can_refresh_direct_debit_status(): void
+    {
+        $company = Company::create([
+            'name' => 'Test Customer Ltd',
+            'connectwise_company_id' => 900001,
+        ]);
+
+        $user = User::factory()->create([
+            'company_id' => $company->id,
+            'role' => 'customer',
+        ]);
+
+        $mock = Mockery::mock(GoCardlessService::class);
+        $companyMatcher = Mockery::on(fn ($value) => $value instanceof Company && $value->is($company));
+        $mock->shouldReceive('refreshMandatesForCompany')->once()->with($companyMatcher)->andReturn(1);
+        $mock->shouldReceive('refreshPaymentsForCompany')->once()->with($companyMatcher)->andReturn(0);
+
+        $this->app->instance(GoCardlessService::class, $mock);
+
+        $this->actingAs($user)
+            ->post(route('customer.direct-debit.refresh'))
+            ->assertRedirect(route('customer.direct-debit.setup'))
+            ->assertSessionHas('status', 'Refreshed 1 mandate(s) and 0 payment(s).');
+    }
 }

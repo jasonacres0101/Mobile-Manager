@@ -49,8 +49,18 @@ class DirectDebitController extends Controller
         $company = $request->user()->company;
         abort_unless($company, 403);
 
-        $mandates = $goCardless->refreshMandatesForCompany($company);
-        $payments = $goCardless->refreshPaymentsForCompany($company);
+        try {
+            $mandates = $goCardless->refreshMandatesForCompany($company);
+            $payments = $goCardless->refreshPaymentsForCompany($company);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('customer.direct-debit.setup')
+                ->withErrors([
+                    'direct_debit_refresh' => 'Unable to refresh GoCardless status right now. Please try again in a moment.',
+                ]);
+        }
 
         return redirect()
             ->route('customer.direct-debit.setup')
@@ -85,7 +95,6 @@ class DirectDebitController extends Controller
                     // Some mandates are not immediately queryable on return; manual refresh/webhooks remain a fallback.
                 }
 
-                $company->update(['gocardless_billing_request_id' => null]);
             }
         }
 

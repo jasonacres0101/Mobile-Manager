@@ -144,13 +144,20 @@ class GoCardlessService
             }
 
             if ($mandateId) {
-                GocardlessMandate::updateOrCreate(
+                $mandate = GocardlessMandate::updateOrCreate(
                     ['mandate_id' => $mandateId],
                     [
                         'company_id' => $company->id,
                         'status' => 'created',
                     ],
                 );
+
+                $refreshedMandate = $this->refreshMandate($mandate);
+                $refreshedStatus = $refreshedMandate->status ?? $mandate->fresh()->status;
+
+                if (filled($refreshedStatus) && $refreshedStatus !== 'created') {
+                    $company->update(['gocardless_billing_request_id' => null]);
+                }
 
                 $count++;
             }
