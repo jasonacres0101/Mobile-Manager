@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Company extends Model
 {
     protected $fillable = [
@@ -60,6 +59,22 @@ class Company extends Model
     public function mandates()
     {
         return $this->hasMany(GocardlessMandate::class);
+    }
+
+    public function currentMandate(): ?GocardlessMandate
+    {
+        return $this->mandates()
+            ->orderByRaw("
+                case status
+                    when 'active' then 1
+                    when 'submitted' then 2
+                    when 'pending_submission' then 3
+                    when 'created' then 4
+                    else 5
+                end
+            ")
+            ->latest('updated_at')
+            ->first();
     }
 
     public function payments()

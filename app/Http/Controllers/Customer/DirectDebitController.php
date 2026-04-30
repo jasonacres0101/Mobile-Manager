@@ -39,7 +39,7 @@ class DirectDebitController extends Controller
 
         return view('customer.direct-debit.setup', [
             'company' => $company,
-            'mandate' => $company->mandates()->latest()->first(),
+            'mandate' => $company->currentMandate(),
             'payments' => $company->payments()->with('invoice')->latest()->take(10)->get(),
         ]);
     }

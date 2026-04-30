@@ -205,4 +205,35 @@ class CustomerPortalTest extends TestCase
             ->assertRedirect(route('customer.direct-debit.setup'))
             ->assertSessionHas('status', 'Refreshed 1 mandate(s) and 0 payment(s).');
     }
+
+    public function test_customer_direct_debit_page_prefers_active_mandate(): void
+    {
+        $company = Company::create([
+            'name' => 'Test Customer Ltd',
+            'connectwise_company_id' => 900001,
+        ]);
+
+        $user = User::factory()->create([
+            'company_id' => $company->id,
+            'role' => 'customer',
+        ]);
+
+        GocardlessMandate::create([
+            'company_id' => $company->id,
+            'mandate_id' => 'MD-ACTIVE',
+            'status' => 'active',
+        ]);
+
+        GocardlessMandate::create([
+            'company_id' => $company->id,
+            'mandate_id' => 'MD-SUBMITTED',
+            'status' => 'submitted',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('customer.direct-debit.setup'))
+            ->assertOk()
+            ->assertSee('MD-ACTIVE')
+            ->assertDontSee('MD-SUBMITTED');
+    }
 }
